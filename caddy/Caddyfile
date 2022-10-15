@@ -1,0 +1,12 @@
+{$SCRUTINY_DOMAIN}:8088 {
+    tls {$CLOUDFLARE_EMAIL} {
+        dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    }
+    reverse_proxy scrutiny:8080
+}
+{$SCRUTINY_DOMAIN}:8089 {
+    tls {$CLOUDFLARE_EMAIL} {
+        dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    }
+    reverse_proxy scrutiny:8086
+}

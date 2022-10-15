@@ -1,0 +1,45 @@
+version: "2.1"
+
+volumes:
+  caddy_data: {}
+  scrutiny_data: {}
+
+services:
+  scrutiny:
+    container_name: scrutiny
+    image: ghcr.io/analogj/scrutiny:master-omnibus
+    environment:
+      - TZ=Europe/Vienna
+    cap_add:
+      - SYS_RAWIO
+      #ports:
+      #- "8088:8080" # webapp
+      #- "8086:8086" # influxDB admin
+    expose:
+      - 8080
+      - 8086
+    volumes:
+      - /run/udev:/run/udev:ro
+      - ${APP_DIR}/config:/opt/scrutiny/config
+      - scrutiny_data:/opt/scrutiny/influxdb
+    devices:
+      - "/dev/sda"
+      - "/dev/sdb"
+      - "/dev/sdc"
+
+  caddy:
+    image: slothcroissant/caddy-cloudflaredns:2.6.1
+    container_name: scrutiny-caddy
+    ports:
+      - "8088:8088"
+      - "8089:8089"
+    volumes:
+      - ${APP_DIR}/caddy:/etc/caddy
+      - caddy_data:/data
+    environment:
+      - TZ=Europe/Vienna
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - SCRUTINY_DOMAIN=${SCRUTINY_DOMAIN}
+      - ACME_AGREE=true
+    restart: unless-stopped
